@@ -65,10 +65,10 @@ class BytesSeq:
             # Переходим к следующим 4 символам
             i += 4
 
-    def get_bytes_seq(self):
+    def get_bytes_seq(self) -> bytearray:
         return self.bytes_seq
 
-    def transform_to_seq(self):
+    def transform_to_seq(self) -> str:
         # decoded_seq = []
         # for byte in self.bytes_seq:
         #     for shift in (6, 4, 2, 0):
@@ -85,5 +85,43 @@ class BytesSeq:
 
         return "".join(decoded_seq)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.seq_length
+
+    def __getitem__(self, index: int | slice) -> bytes | bytearray:
+        if isinstance(index, int):
+            if index < 0:
+                index += self.seq_length
+            if index < 0 or index >= self.seq_length:
+                raise IndexError("Index out of range")
+            byte_index = index // 4
+            bit_offset = 6 - 2 * (index % 4)
+            byte = self.bytes_seq[byte_index]
+            code = (byte >> bit_offset) & 0b11
+            return code
+
+        elif isinstance(index, slice):      # реализуем поддержку слайсов
+            start = index.start if index.start is not None else 0
+            stop = index.stop if index.stop is not None else self.seq_length
+            step = index.step if index.step is not None else 1
+
+            # поддержка отрицательных индексов
+            if start < 0:
+                start += self.seq_length
+            if stop < 0:
+                stop += self.seq_length
+
+            # явная проверка на выход за границы
+            if not (0 <= start <= self.seq_length):
+                raise IndexError("Index out of range")
+            if not (0 <= stop <= self.seq_length):
+                raise IndexError("Index out of range")
+            if step == 0:
+                raise ValueError("Index out of range")
+            result = []
+            for idx in range(start, stop, step):
+                result.append(self[idx])     # рекурсивно вызываем __getitem__ для int
+            return result
+
+        else:
+            raise TypeError("Index must be int or slice")
