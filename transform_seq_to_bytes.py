@@ -2,6 +2,19 @@ from typing import Optional
 
 
 class BytesSeq():
+    """A class for compact storage and manipulation of DNA sequences.
+
+    This class provides efficient storage of DNA sequences by encoding each nucleotide
+    ('a', 'c', 'g', 't') into 2 bits and packing them into bytes (4 nucleotides per byte).
+    The class supports encoding, decoding and accessing the compressed sequence.
+
+    Attributes:
+        encode_mask (dict): A dictionary mapping nucleotides to their 2-bit codes.
+        decode_mask (dict): A dictionary mapping 2-bit codes back to nucleotides.
+        bytes_seq (bytearray): The compressed byte sequence storing the DNA data.
+        seq_length (int): The length of the original DNA sequence.
+    """
+     
     encode_mask: dict
     decode_mask: dict
     bytes_seq: bytearray
