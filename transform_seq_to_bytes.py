@@ -1,7 +1,7 @@
 from typing import Optional
 
 
-class BytesSeq():
+class BytesSeq:
     """A class for compact storage and manipulation of DNA sequences.
 
     This class provides efficient storage of DNA sequences by encoding each nucleotide
@@ -14,7 +14,7 @@ class BytesSeq():
         bytes_seq (bytearray): The compressed byte sequence storing the DNA data.
         seq_length (int): The length of the original DNA sequence.
     """
-     
+
     encode_mask: dict
     decode_mask: dict
     bytes_seq: bytearray
@@ -24,13 +24,10 @@ class BytesSeq():
     # использования лишней памяти. У класса реализован метод,
     # позволяющий налету декодировать битовую последовательность в строку
 
-
-    def __init__(self, sequence: str,
-                 encode_mask: Optional[dict] = None):
+    def __init__(self, sequence: str, encode_mask: Optional[dict] = None):
         self.bytes_seq = bytearray()
         if encode_mask is None:
-            self.encode_mask = {'a': 0b00, 'c': 0b01,
-                                'g': 0b10, 't': 0b11}
+            self.encode_mask = {"a": 0b00, "c": 0b01, "g": 0b10, "t": 0b11}
         self.decode_mask = {v: k for k, v in self.encode_mask.items()}
 
         # for i in range(0, len(sequence), 4):
@@ -49,7 +46,9 @@ class BytesSeq():
             byte = 0  # Инициализируем новый байт для 4 букв
             # в этом подцикле записываем 4 буквы в один байт
             for j in range(4):
-                if i + j < self.seq_length:       # проверка, что мы не вышли за последовательность
+                if (
+                    i + j < self.seq_length
+                ):  # проверка, что мы не вышли за последовательность
                     ch = sequence[i + j]
                     # кодируем символ в 2 бита и размещаем в нужной позиции байта
                     # сдвигаем на (6 - 2*j) бит, чтобы распределить 4 символа по 8 битам:
@@ -59,15 +58,15 @@ class BytesSeq():
                     # 4-й символ: биты 0-1
                     byte |= self.encode_mask[ch] << (6 - 2 * j)
                 else:
-                    byte |= pad_value << (6 - 2 * j)    # если последний блок не из 4 букв, заполняем буквами t
+                    byte |= pad_value << (
+                        6 - 2 * j
+                    )  # если последний блок не из 4 букв, заполняем буквами t
             self.bytes_seq.append(byte)
             # Переходим к следующим 4 символам
             i += 4
 
-
     def get_bytes_seq(self):
         return self.bytes_seq
-
 
     def transform_to_seq(self):
         # decoded_seq = []
@@ -84,4 +83,7 @@ class BytesSeq():
             code = (byte >> bit_offset) & 0b11
             decoded_seq.append(self.decode_mask[code])
 
-        return ''.join(decoded_seq)
+        return "".join(decoded_seq)
+
+    def __len__(self):
+        return self.seq_length
