@@ -2,7 +2,8 @@
 import argparse
 import logging
 import os
-
+from bwt_map import mapping
+from coords_to_sam import write_sam
 
 def parse() -> os.path:
     """
@@ -21,6 +22,8 @@ def parse() -> os.path:
                         default=None, type=str, help='File with reads')
     parser.add_argument('-ref', '--reference_sequence',
                         default=None, type=str, help='Reference sequence to align to')
+    parser.add_argument('-fn', '--filename', type=str,
+                        default=f'{os.getcwd()}', help='The name of SAM')
     parser.add_argument('-od', '--output_directory', type=str,
                         default=f'{os.getcwd()}', help='The path to the save directory')
     parser.add_argument('-lg', '--logging', type=bool, choices=(True, False),
@@ -33,8 +36,8 @@ def parse() -> os.path:
 
     if not os.path.exists(args.output_directory):
         os.makedirs(args.output_directory)
-
-
+    mapping_dict = mapping(args.reference_sequence, args.reads)
+    write_sam(mapping_dict, args.reads, args.filename)
 
 
 if __name__ == "__main__":
