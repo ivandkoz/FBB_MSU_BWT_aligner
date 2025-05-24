@@ -1,9 +1,9 @@
-from .parse_fasta import GenomeParser, ReadsParser, Genome
-from .transform_seq_to_bytes import BytesSeq
+from parse_fasta import GenomeParser, ReadsParser, Genome
+from transform_seq_to_bytes import BytesSeq
 import numpy as np
 import os
 import gc
-from .bwt import BWT, BWTMatch, get_Count, get_FO, thin_Count, CompressedSuffixArray
+from bwt import BWT, BWTMatch, get_Count, get_FO, thin_Count, CompressedSuffixArray
 
 
 def find_exact_match(g_part:str, 
