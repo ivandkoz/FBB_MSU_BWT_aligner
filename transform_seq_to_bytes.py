@@ -27,7 +27,15 @@ class BytesSeq:
     def __init__(self, sequence: str, encode_mask: Optional[dict] = None):
         self.bytes_seq = bytearray()
         if encode_mask is None:
-            self.encode_mask = {"a": 0b00, "c": 0b01, "g": 0b10, "t": 0b11}
+            # self.encode_mask = {"a": 0b00, "c": 0b01, "g": 0b10, "t": 0b11}
+            self.encode_mask = self.encode_mask = {
+                                            "a": 0b000,  # 0
+                                            "c": 0b001,  # 1
+                                            "g": 0b010,  # 2
+                                            "t": 0b011,  # 3
+                                            "n": 0b100,  # 4
+                                            "$": 0b101,  # 5 терминатор
+                                        }
         self.decode_mask = {v: k for k, v in self.encode_mask.items()}
 
         # for i in range(0, len(sequence), 4):
@@ -39,31 +47,22 @@ class BytesSeq:
         sequence = sequence.lower()
         self.seq_length = len(sequence)
         i = 0  # Индекс текущего положения в последовательности
-        pad_value = 0b11
+        pad_value = self.encode_mask["$"]  # для щаполенения в случае нечетности последовательности
         # В цикле будем перескакивать через 4 символа за раз. Смотрим пачками по 4 буквы
         # Пришлось использовать while и прыжки через 4, чтобы избавиться от срезов
         while i < self.seq_length:
-            byte = 0  # Инициализируем новый байт для 4 букв
-            # в этом подцикле записываем 4 буквы в один байт
-            for j in range(4):
-                if (
-                    i + j < self.seq_length
-                ):  # проверка, что мы не вышли за последовательность
+            byte = 0  # Инициализируем новый байт для 2 букв
+            # в этом подцикле записываем 2 буквы в один байт
+            for j in range(2):
+                if i + j < self.seq_length:
                     ch = sequence[i + j]
-                    # кодируем символ в 2 бита и размещаем в нужной позиции байта
-                    # сдвигаем на (6 - 2*j) бит, чтобы распределить 4 символа по 8 битам:
-                    # 1-й символ: биты 6-7
-                    # 2-й символ: биты 4-5
-                    # 3-й символ: биты 2-3
-                    # 4-й символ: биты 0-1
-                    byte |= self.encode_mask[ch] << (6 - 2 * j)
+                    code = self.encode_mask[ch]
                 else:
-                    byte |= pad_value << (
-                        6 - 2 * j
-                    )  # если последний блок не из 4 букв, заполняем буквами t
+                    code = pad_value
+                shift = 5 - 3 * j  # для j=0 сдвиг 5 (биты 7-5), для j=1 сдвиг 2 (биты 4-2)
+                byte |= code << shift
             self.bytes_seq.append(byte)
-            # Переходим к следующим 4 символам
-            i += 4
+            i += 2
 
     def get_bytes_seq(self) -> bytearray:
         return self.bytes_seq
@@ -77,12 +76,11 @@ class BytesSeq:
 
         decoded_seq = []
         for idx in range(self.seq_length):
-            byte_index = idx // 4
-            bit_offset = 6 - 2 * (idx % 4)
+            byte_index = idx // 2
+            bit_offset = 5 - 3 * (idx % 2)
             byte = self.bytes_seq[byte_index]
-            code = (byte >> bit_offset) & 0b11
+            code = (byte >> bit_offset) & 0b111  # теперь 3 бита
             decoded_seq.append(self.decode_mask[code])
-
         return "".join(decoded_seq)
 
     def __len__(self) -> int:
@@ -94,10 +92,10 @@ class BytesSeq:
                 index += self.seq_length
             if index < 0 or index >= self.seq_length:
                 raise IndexError("Index out of range")
-            byte_index = index // 4
-            bit_offset = 6 - 2 * (index % 4)
+            byte_index = index // 2
+            bit_offset = 5 - 3 * (index % 2)
             byte = self.bytes_seq[byte_index]
-            code = (byte >> bit_offset) & 0b11
+            code = (byte >> bit_offset) & 0b111
             return code
 
         elif isinstance(index, slice):      # реализуем поддержку слайсов
