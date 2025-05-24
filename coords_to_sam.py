@@ -1,18 +1,24 @@
 import math
+from parse_fasta import ReadsParser
 
-def write_sam(mappings, reads_dict, output_filename='output.sam', rname='ref', reference_length=1000000):
+def write_sam(mappings, reads_path, output_filename='output.sam', rname='ref', reference_length=1000000):
 
-    with open(output_filename, 'w') as sam_file:
+   with open(output_filename, 'w') as sam_file, ReadsParser(reads_path) as parser:
         # Заголовок SAM
         sam_file.write(f'@HD\tVN:1.6\tSO:unsorted\n')
         sam_file.write(f'@SQ\tSN:{rname}\tLN:{reference_length}\n')
         
+        # Создаем словарь для быстрого доступа к длинам ридов
+        read_lengths = {}
+        for read in parser:
+            read_lengths[read.header] = len(read.sequence)
+        
         # Запись выравниваний
         for read_id, positions in mappings.items():
-            if read_id not in reads_dict:
+            if read_id not in read_lengths:
                 continue  # Пропускаем риды без данных о последовательности
                 
-            read_length = len(reads_dict[read_id])
+            read_length = read_lengths[read_id]
             n_hits = len(positions)
             
             # Расчет MAPQ

@@ -1,0 +1,10 @@
+@HD	VN:1.6	SO:unsorted
+@SQ	SN:ref	LN:1000000
+SRR33608281.6 A01057:344:HTGKFDSX5:3:1101:1253:5791/1 length=151	0	ref	15712	3	240M	*	0	0	*	*
+SRR33608281.6 A01057:344:HTGKFDSX5:3:1101:1253:5791/1 length=151	256	ref	2672	3	240M	*	0	0	*	*
+test2	0	ref	332	0	18M	*	0	0	*	*
+test2	256	ref	12852	0	18M	*	0	0	*	*
+test2	256	ref	25892	0	18M	*	0	0	*	*
+test2	256	ref	24829	0	18M	*	0	0	*	*
+test2	256	ref	13372	0	18M	*	0	0	*	*
+test2	256	ref	11789	0	18M	*	0	0	*	*
