@@ -7,8 +7,7 @@ def SuffixArray(s):
 # def SuffixArrayBytes(s: BytesSeq) -> list[int]:
 #     return sorted(range(len(s)), key=lambda i: s[i:])
 
-def CompressedSuffixArray(s, step):
-    sa = SuffixArray(s)
+def CompressedSuffixArray(sa, step):
     return {i: sa[i] for i in range(len(sa)) if sa[i] % step == 0}
 
 
@@ -52,7 +51,7 @@ def BWT(s):
         # Подумай про использование chr('letter') и RLE для такого
         # Подумай про поиск одинаковых строк разом  
         bwt.append(x)
-    return bwt
+    return bwt, sa
 
 
 def get_FO(bwt):
